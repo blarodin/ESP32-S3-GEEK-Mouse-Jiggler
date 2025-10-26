@@ -5,11 +5,19 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 ## Features
 
 - **BLE Mouse Emulation**: Acts as a Bluetooth mouse that your computer can connect to
-- **Automatic Jiggling**: Moves the cursor in a small square pattern every 30 seconds
-- **Subtle Movement**: Uses 2-pixel movements that are barely noticeable
+- **WiFi Configuration Portal**: Built-in web interface for easy configuration
+  - Configure jiggle interval (5-300 seconds)
+  - Choose between square or random movement patterns
+  - Adjust movement distance
+  - Customize BLE device name
+  - Change WiFi AP credentials
+  - All settings persist across reboots
+- **Movement Modes**:
+  - **Square Pattern**: Moves in a predictable 4-point square
+  - **Random Pattern**: Random direction and distance within configured range
 - **Beautiful LCD Display**: Full-featured color display with real-time status
   - State-based UI (Initializing, Waiting, Connected, Jiggling)
-  - Full-width blue header bar with device name
+  - Full-width blue header bar with device name and WiFi indicator
   - Live countdown timer showing seconds until next jiggle
   - Jiggle counter tracking total activations
   - Color-changing progress bar (green → yellow → red)
@@ -58,26 +66,69 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 
 ## Usage
 
+### Initial Setup
+
 1. Upload the code to your ESP32-S3-GEEK
-2. On your computer, open Bluetooth settings
-3. Look for a device named **"Mouse Jiggler"**
-4. Pair and connect to the device
-5. The mouse will automatically start jiggling every 30 seconds
-6. Monitor the LCD display for real-time status and countdown
-7. Optionally monitor the Serial output (115200 baud) to see activity logs
+2. The device will show WiFi AP information on startup (alternating 2 screens):
+   
+   **Screen 1 - WiFi Network:**
+   - SSID: `MouseJiggler-Config` (default)
+   - Password: `jiggler123` (default)
+   
+   **Screen 2 - Connection Info:**
+   - IP Address: `192.168.4.1`
+   - URL to open in browser
+   
+   Each screen displays for 1.5 seconds, then the device starts BLE mode
+
+### Configuration (Optional)
+
+3. Connect to the WiFi network on your phone or computer
+4. Open a browser and navigate to `http://192.168.4.1`
+5. Configure your preferred settings:
+   - Jiggle interval (how often to move the mouse)
+   - Movement pattern (square or random)
+   - Movement distance
+   - BLE device name
+   - WiFi credentials (if you want to change them)
+6. Click "Save Settings" - changes are stored permanently
+
+### Normal Operation
+
+7. On your computer, open Bluetooth settings
+8. Look for a device named **"Mouse Jiggler"** (or your custom name)
+9. Pair and connect to the device
+10. The mouse will automatically start jiggling based on your configuration
+11. Monitor the LCD display for real-time status and countdown
+12. The WiFi AP remains active for future configuration changes
 
 ## Configuration
 
-You can customize the behavior by modifying these constants in `src/main.cpp`:
+Configuration is now done through the web interface! No need to modify code.
 
-```cpp
-const unsigned long JIGGLE_INTERVAL = 30000;  // Time between jiggles (30 seconds)
-const int MOVE_DISTANCE = 2;                   // Movement distance (pixels)
-```
+### Web Interface Settings
+
+**Jiggle Settings:**
+- **Interval**: 5-300 seconds (default: 30 seconds)
+- **Move Distance**: 1-20 pixels (default: 2 pixels)
+- **Random Movements**: Enable/disable random pattern (default: off)
+- **Random Min/Max Distance**: Configure random movement range (default: 1-5 pixels)
+
+**Device Settings:**
+- **BLE Device Name**: Customize Bluetooth name (default: "Mouse Jiggler")
+  - Note: Requires device restart to take effect
+
+**WiFi AP Settings:**
+- **SSID**: Change WiFi network name (default: "MouseJiggler-Config")
+- **Password**: Change WiFi password (default: "jiggler123")
+  - Minimum 8 characters required
+
+All settings are automatically saved to non-volatile storage and persist across power cycles.
 
 ### Display Configuration
 
 The LCD display is fully integrated and shows:
+- WiFi indicator in header bar
 - Connection status with visual indicator
 - Real-time countdown timer
 - Progress bar showing time until next jiggle
@@ -89,12 +140,20 @@ The display uses optimized rendering to minimize flickering and power consumptio
 
 The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, informative interface:
 
-**Display Features:**
-- Full-width blue header with "MOUSE JIGGLER" title
+**Startup Display (WiFi Configuration):**
+
+Two alternating screens show WiFi setup information:
+- **Screen 1**: WiFi network credentials (SSID and password)
+- **Screen 2**: Browser connection details (IP address and URL)
+- Each screen displays for 1.5 seconds using Font16 for readability
+- After 3 seconds total, transitions to normal operation mode
+
+**Normal Operation Display:**
+- Full-width blue header with "MOUSE JIGGLER" title and WiFi indicator
 - Connection status indicator (red dot when waiting, green when connected)
 - State display: WAITING (yellow) or ACTIVE (green)
 - Real-time countdown showing seconds until next jiggle
-- Jiggle counter showing total activations
+- Jiggle counter tracking total activations
 - Animated progress bar with color gradient:
   - Green (0-33%): Just activated
   - Yellow (33-66%): Halfway to next jiggle
@@ -108,13 +167,21 @@ The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, in
 
 ## How It Works
 
-The jiggler creates a BLE HID (Human Interface Device) that appears as a standard Bluetooth mouse to your computer. Every 30 seconds, it sends movement commands in a small square pattern:
-- Move right 2 pixels
-- Move down 2 pixels  
-- Move left 2 pixels
-- Move up 2 pixels
+The jiggler creates a BLE HID (Human Interface Device) that appears as a standard Bluetooth mouse to your computer.
 
-This returns the cursor to approximately its original position while keeping the system active. The LCD display provides real-time feedback showing the countdown until the next jiggle, connection status, and total activity count.
+**Square Pattern Mode** (default):
+- Move right (configurable distance)
+- Move down
+- Move left
+- Move up
+- Returns cursor to approximately original position
+
+**Random Pattern Mode**:
+- Moves in a random direction with random distance
+- Distance range is configurable (e.g., 1-5 pixels)
+- Returns to origin after each movement
+
+The WiFi Access Point runs continuously, allowing you to change settings at any time via the web interface. The LCD display provides real-time feedback showing the countdown until the next jiggle, connection status, and total activity count.
 
 ## Troubleshooting
 
@@ -125,8 +192,15 @@ This returns the cursor to approximately its original position while keeping the
 
 **Computer still goes to sleep:**
 - The default interval is 30 seconds, which should be sufficient for most systems
-- If needed, reduce `JIGGLE_INTERVAL` to a shorter time (e.g., 15000 for 15 seconds)
-- Increase `MOVE_DISTANCE` for more noticeable movement (e.g., 5-10 pixels)
+- Use the web interface to reduce the interval (e.g., 15 seconds)
+- Increase the movement distance via web interface (e.g., 5-10 pixels)
+- Try enabling random movements for more varied activity
+
+**Can't access web interface:**
+- Ensure you're connected to the correct WiFi network
+- Check the LCD display for the correct IP address (should be 192.168.4.1)
+- Try forgetting the network and reconnecting
+- Check serial monitor for WiFi status messages
 
 **Upload fails:**
 - Hold the BOOT button while uploading
