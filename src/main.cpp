@@ -40,6 +40,7 @@ unsigned long jiggleCount = 0;
 unsigned long lastDrawnJiggleCount = 0;
 unsigned long nextJiggleIn = 0;
 unsigned long lastDrawnNextJiggleIn = 0;
+int lastDrawnProgress = -1;  // Track last drawn progress percentage
 
 // Function declarations
 void performJiggle();
@@ -223,6 +224,7 @@ void updateDisplay(bool forceFullRedraw) {
     lastDrawnState = currentState;
     lastDrawnJiggleCount = jiggleCount;
     lastDrawnNextJiggleIn = nextJiggleIn;
+    lastDrawnProgress = -1;  // Reset progress tracker on full redraw
   }
 }
 
@@ -285,20 +287,32 @@ void drawProgressBar(int percentage) {
   if (percentage < 0) percentage = 0;
   if (percentage > 100) percentage = 100;
   
+  // Skip redraw if percentage hasn't changed
+  if (percentage == lastDrawnProgress) return;
+  
   int barX = 15;
   int barY = 110;
   int barWidth = LCD_HEIGHT - 30;  // Use LCD_HEIGHT for rotated width
   int barHeight = 12;
   
-  // Clear the entire bar area first (inside the border)
-  Paint_DrawRectangle(barX, barY, barX + barWidth, barY + barHeight, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+  int oldFillWidth = (barWidth * lastDrawnProgress) / 100;
+  int newFillWidth = (barWidth * percentage) / 100;
   
-  // Draw border
-  Paint_DrawRectangle(barX - 1, barY - 1, barX + barWidth + 1, barY + barHeight + 1, 0x07FF, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+  // Only redraw on first call (full redraw) or when bar is shrinking
+  if (lastDrawnProgress < 0 || newFillWidth < oldFillWidth) {
+    // Clear only the portion that needs clearing (from new position to end)
+    if (newFillWidth < barWidth) {
+      Paint_DrawRectangle(barX + newFillWidth, barY, barX + barWidth, barY + barHeight, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+    }
+  }
+  
+  // Draw border (only on first draw)
+  if (lastDrawnProgress < 0) {
+    Paint_DrawRectangle(barX - 1, barY - 1, barX + barWidth + 1, barY + barHeight + 1, 0x07FF, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
+  }
   
   // Draw filled portion
-  int fillWidth = (barWidth * percentage) / 100;
-  if (fillWidth > 0) {
+  if (newFillWidth > 0) {
     // Gradient effect: change color based on progress
     uint16_t barColor;
     if (percentage < 33) {
@@ -310,7 +324,9 @@ void drawProgressBar(int percentage) {
     }
     
     for (int y = 0; y < barHeight; y++) {
-      Paint_DrawLine(barX, barY + y, barX + fillWidth, barY + y, barColor, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
+      Paint_DrawLine(barX, barY + y, barX + newFillWidth, barY + y, barColor, DOT_PIXEL_1X1, LINE_STYLE_SOLID);
     }
   }
+  
+  lastDrawnProgress = percentage;
 }
