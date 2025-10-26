@@ -5,11 +5,18 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 ## Features
 
 - **BLE Mouse Emulation**: Acts as a Bluetooth mouse that your computer can connect to
-- **Automatic Jiggling**: Moves the cursor in a small square pattern every 60 seconds
+- **Automatic Jiggling**: Moves the cursor in a small square pattern every 30 seconds
 - **Subtle Movement**: Uses 2-pixel movements that are barely noticeable
+- **Beautiful LCD Display**: Full-featured color display with real-time status
+  - State-based UI (Initializing, Waiting, Connected, Jiggling)
+  - Full-width blue header bar with device name
+  - Live countdown timer showing seconds until next jiggle
+  - Jiggle counter tracking total activations
+  - Color-changing progress bar (green → yellow → red)
+  - Connection status indicator dot (red/green)
+  - Optimized partial updates for flicker-free rendering
 - **Status Monitoring**: Serial output shows connection and jiggling status
 - **Low Power**: Efficient BLE operation suitable for battery-powered use
-- **LCD Ready**: Prepared for optional LCD display integration
 
 ## Hardware Requirements
 
@@ -55,41 +62,59 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 2. On your computer, open Bluetooth settings
 3. Look for a device named **"Mouse Jiggler"**
 4. Pair and connect to the device
-5. The mouse will automatically start jiggling every 60 seconds
-6. Monitor the Serial output (115200 baud) to see activity logs
+5. The mouse will automatically start jiggling every 30 seconds
+6. Monitor the LCD display for real-time status and countdown
+7. Optionally monitor the Serial output (115200 baud) to see activity logs
 
 ## Configuration
 
-You can customize the behavior by modifying these constants in `BLE_Mouse_Jiggler.ino`:
+You can customize the behavior by modifying these constants in `src/main.cpp`:
 
 ```cpp
-const unsigned long JIGGLE_INTERVAL = 60000;  // Time between jiggles (ms)
+const unsigned long JIGGLE_INTERVAL = 30000;  // Time between jiggles (30 seconds)
 const int MOVE_DISTANCE = 2;                   // Movement distance (pixels)
 ```
 
-## Optional LCD Display Support
+### Display Configuration
 
-The code includes commented-out sections for LCD display integration. To enable:
+The LCD display is fully integrated and shows:
+- Connection status with visual indicator
+- Real-time countdown timer
+- Progress bar showing time until next jiggle
+- Total jiggle count
 
-1. Copy the LCD driver files from `examples/Arduino/WIFI/WIFI_AP_LCD/` directory:
-   - `LCD_Driver.h` and `LCD_Driver.cpp`
-   - `GUI_Paint.h` and `GUI_Paint.cpp`
-   - `DEV_Config.h` and `DEV_Config.cpp`
-   - Required font files
+The display uses optimized rendering to minimize flickering and power consumption.
 
-2. Uncomment the LCD-related sections in `BLE_Mouse_Jiggler.ino`
+## LCD Display
 
-3. Rebuild and upload
+The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, informative interface:
+
+**Display Features:**
+- Full-width blue header with "MOUSE JIGGLER" title
+- Connection status indicator (red dot when waiting, green when connected)
+- State display: WAITING (yellow) or ACTIVE (green)
+- Real-time countdown showing seconds until next jiggle
+- Jiggle counter showing total activations
+- Animated progress bar with color gradient:
+  - Green (0-33%): Just activated
+  - Yellow (33-66%): Halfway to next jiggle
+  - Red (66-100%): About to jiggle
+
+**Display Optimization:**
+- Smart partial updates: only redraws changing elements
+- Flicker-free progress bar rendering
+- Labels remain static while values update
+- Minimal CPU usage for display updates
 
 ## How It Works
 
-The jiggler creates a BLE HID (Human Interface Device) that appears as a standard Bluetooth mouse to your computer. Every 60 seconds, it sends movement commands in a small square pattern:
+The jiggler creates a BLE HID (Human Interface Device) that appears as a standard Bluetooth mouse to your computer. Every 30 seconds, it sends movement commands in a small square pattern:
 - Move right 2 pixels
 - Move down 2 pixels  
 - Move left 2 pixels
 - Move up 2 pixels
 
-This returns the cursor to approximately its original position while keeping the system active.
+This returns the cursor to approximately its original position while keeping the system active. The LCD display provides real-time feedback showing the countdown until the next jiggle, connection status, and total activity count.
 
 ## Troubleshooting
 
@@ -99,8 +124,9 @@ This returns the cursor to approximately its original position while keeping the
 - Check serial monitor for connection status
 
 **Computer still goes to sleep:**
-- Reduce `JIGGLE_INTERVAL` to a shorter time
-- Increase `MOVE_DISTANCE` for more noticeable movement
+- The default interval is 30 seconds, which should be sufficient for most systems
+- If needed, reduce `JIGGLE_INTERVAL` to a shorter time (e.g., 15000 for 15 seconds)
+- Increase `MOVE_DISTANCE` for more noticeable movement (e.g., 5-10 pixels)
 
 **Upload fails:**
 - Hold the BOOT button while uploading
