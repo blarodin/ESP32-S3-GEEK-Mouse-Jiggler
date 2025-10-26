@@ -1,0 +1,28 @@
+# Examples folder
+examples/
+
+# PlatformIO
+.pio/
+.vscode/
+.pioenvs/
+.piolibdeps/
+
+# Build artifacts
+*.o
+*.elf
+*.bin
+*.hex
+
+# IDE files
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
