@@ -18,7 +18,7 @@
 BleMouse bleMouse("Mouse Jiggler", "ESP32-S3-GEEK", 100);
 
 // Jiggler configuration
-const unsigned long JIGGLE_INTERVAL = 60000;  // Move every 60 seconds (1 minute)
+const unsigned long JIGGLE_INTERVAL = 30000;  // Move every 30 seconds
 const int MOVE_DISTANCE = 2;                   // Small movement distance in pixels
 unsigned long lastJiggleTime = 0;
 bool isJiggling = false;
@@ -104,6 +104,7 @@ void loop() {
   if (bleMouse.isConnected()) {
     if (!isJiggling) {
       isJiggling = true;
+      lastJiggleTime = currentTime;  // Reset timer on connection
       Serial.println("Mouse connected! Jiggler active.");
       currentState = STATE_CONNECTED;
       updateDisplay(true);  // Full redraw on state change
@@ -234,23 +235,23 @@ void updateCountdownOnly() {
     // Clear and update only the numeric values, not the labels
     
     if (jiggleCount != lastDrawnJiggleCount) {
-      // Clear only the number area for jiggle count (after "Jiggles: ")
-      Paint_DrawRectangle(95, 60, LCD_WIDTH - 15, 75, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+      // Clear only the number area ("Jiggles: " takes ~95 pixels)
+      Paint_DrawRectangle(110, 60, LCD_HEIGHT - 15, 75, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
       
       // Draw only the number
       char countStr[16];
       sprintf(countStr, "%lu", jiggleCount);
-      Paint_DrawString_EN(95, 60, countStr, &Font16, 0x0010, 0xFFFF);
+      Paint_DrawString_EN(110, 60, countStr, &Font16, 0x0010, 0xFFFF);
     }
     
     if (nextJiggleIn != lastDrawnNextJiggleIn) {
-      // Clear only the number area for countdown (after "Next in: ")
-      Paint_DrawRectangle(95, 85, LCD_WIDTH - 15, 100, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
+      // Clear the number area wider to handle 2-digit to 1-digit transitions
+      Paint_DrawRectangle(110, 85, LCD_HEIGHT - 15, 100, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
       
-      // Draw only the number with 's'
+      // Draw only the number with 's' - aligned with jiggle counter
       char timeStr[16];
       sprintf(timeStr, "%lus", nextJiggleIn);
-      Paint_DrawString_EN(95, 85, timeStr, &Font16, 0x0010, 0xFFE0);
+      Paint_DrawString_EN(110, 85, timeStr, &Font16, 0x0010, 0xFFE0);
       
       // Update progress bar
       int progress = 100 - ((nextJiggleIn * 100) / (JIGGLE_INTERVAL / 1000));
@@ -286,8 +287,11 @@ void drawProgressBar(int percentage) {
   
   int barX = 15;
   int barY = 110;
-  int barWidth = LCD_WIDTH - 30;
+  int barWidth = LCD_HEIGHT - 30;  // Use LCD_HEIGHT for rotated width
   int barHeight = 12;
+  
+  // Clear the entire bar area first (inside the border)
+  Paint_DrawRectangle(barX, barY, barX + barWidth, barY + barHeight, 0x0010, DOT_PIXEL_1X1, DRAW_FILL_FULL);
   
   // Draw border
   Paint_DrawRectangle(barX - 1, barY - 1, barX + barWidth + 1, barY + barHeight + 1, 0x07FF, DOT_PIXEL_1X1, DRAW_FILL_EMPTY);
