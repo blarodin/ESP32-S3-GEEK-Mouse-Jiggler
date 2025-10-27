@@ -250,8 +250,13 @@ private:
       .then(r => r.json())
       .then(data => {
         const msg = document.getElementById('successMessage');
+        msg.textContent = '✓ Settings saved! Device rebooting...';
         msg.style.display = 'block';
-        setTimeout(() => msg.style.display = 'none', 3000);
+        
+        // Show reboot message for 3 seconds
+        setTimeout(() => {
+          msg.textContent = '✓ Please reconnect to WiFi and refresh page.';
+        }, 3000);
       });
     });
     
@@ -325,10 +330,16 @@ public:
               
               // Read POST body if present
               if (isPost && contentLength > 0) {
+                Serial.print("Reading POST body, Content-Length: ");
+                Serial.println(contentLength);
                 delay(10);  // Give time for body to arrive
                 while (requestBody.length() < contentLength && client.available()) {
                   requestBody += (char)client.read();
                 }
+                Serial.print("POST body read (");
+                Serial.print(requestBody.length());
+                Serial.println(" bytes)");
+                Serial.println(requestBody);
               }
               
               // Handle request
@@ -379,6 +390,14 @@ private:
       client.println();
       
       JigglerConfig& cfg = configManager->getConfig();
+      Serial.println("Sending config:");
+      Serial.print("  Interval: ");
+      Serial.println(cfg.jiggleInterval);
+      Serial.print("  Distance: ");
+      Serial.println(cfg.moveDistance);
+      Serial.print("  Random: ");
+      Serial.println(cfg.randomMoves);
+      
       String json = "{";
       json += "\"interval\":" + String(cfg.jiggleInterval) + ",";
       json += "\"distance\":" + String(cfg.moveDistance) + ",";
@@ -431,8 +450,14 @@ private:
       
       configManager->setConfig(newConfig);
       
-      client.print("{\"success\":true}");
+      client.print("{\"success\":true,\"message\":\"Rebooting...\"}");
       Serial.println("Configuration updated via web interface");
+      Serial.println("Rebooting in 2 seconds...");
+      
+      delay(100);  // Give time for response to send
+      client.stop();
+      delay(2000);  // Wait 2 seconds
+      ESP.restart();  // Reboot device
     }
     else if (requestLine.indexOf("POST /api/reset") >= 0 && isPost) {
       client.println("Content-type:application/json");

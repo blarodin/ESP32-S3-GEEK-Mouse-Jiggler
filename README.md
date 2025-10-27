@@ -69,7 +69,13 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 ### Initial Setup
 
 1. Upload the code to your ESP32-S3-GEEK
-2. The device will show WiFi AP information on startup (alternating 2 screens):
+2. The device displays a boot screen (2 seconds) showing:
+   - **MOUSE JIGGLER** (white)
+   - **ESP32-S3-GEEK** (cyan)
+   - **YEVHENII RODIN** (yellow)
+   - **BLARODIN@GMAIL.COM** (yellow)
+   
+3. After the boot screen, WiFi AP information alternates between 2 screens:
    
    **Screen 1 - WiFi Network:**
    - SSID: `MouseJiggler-Config` (default)
@@ -83,24 +89,27 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 
 ### Configuration (Optional)
 
-3. Connect to the WiFi network on your phone or computer
-4. Open a browser and navigate to `http://192.168.4.1`
-5. Configure your preferred settings:
+4. Connect to the WiFi network on your phone or computer
+5. Open a browser and navigate to `http://192.168.4.1`
+6. Configure your preferred settings:
    - Jiggle interval (how often to move the mouse)
    - Movement pattern (square or random)
    - Movement distance
    - BLE device name
    - WiFi credentials (if you want to change them)
-6. Click "Save Settings" - changes are stored permanently
+7. Click "Save Settings"
+   - Settings are saved to non-volatile storage
+   - **Device automatically reboots** with new configuration
+   - Reconnect to WiFi after reboot to verify settings
 
 ### Normal Operation
 
-7. On your computer, open Bluetooth settings
-8. Look for a device named **"Mouse Jiggler"** (or your custom name)
-9. Pair and connect to the device
-10. The mouse will automatically start jiggling based on your configuration
-11. Monitor the LCD display for real-time status and countdown
-12. The WiFi AP remains active for future configuration changes
+8. On your computer, open Bluetooth settings
+9. Look for a device named **"Mouse Jiggler"** (or your custom name)
+10. Pair and connect to the device
+11. The mouse will automatically start jiggling based on your configuration
+12. Monitor the LCD display for real-time status and countdown
+13. The WiFi AP remains active for future configuration changes
 
 ## Configuration
 
@@ -116,7 +125,7 @@ Configuration is now done through the web interface! No need to modify code.
 
 **Device Settings:**
 - **BLE Device Name**: Customize Bluetooth name (default: "Mouse Jiggler")
-  - Note: Requires device restart to take effect
+  - Device automatically reboots after saving to apply changes
 
 **WiFi AP Settings:**
 - **SSID**: Change WiFi network name (default: "MouseJiggler-Config")
@@ -139,6 +148,13 @@ The display uses optimized rendering to minimize flickering and power consumptio
 ## LCD Display
 
 The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, informative interface:
+
+**Boot Screen (2 seconds):**
+- Left-aligned display showing:
+  - **MOUSE JIGGLER** (white)
+  - **ESP32-S3-GEEK** (cyan)
+  - **YEVHENII RODIN** (yellow - author)
+  - **BLARODIN@GMAIL.COM** (yellow - contact)
 
 **Startup Display (WiFi Configuration):**
 

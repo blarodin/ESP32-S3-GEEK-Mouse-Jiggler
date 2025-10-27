@@ -94,14 +94,16 @@ void setup() {
   LCD_Clear(0x001F);  // Deep blue background
   Serial.println("LCD cleared");
   
-  // Draw startup screen with centered title
+  // Draw startup screen - left aligned
   Serial.println("Drawing startup screen...");
-  Paint_DrawString_EN(15, 20, "MOUSE JIGGLER", &Font16, 0x001F, 0xFFFF);
-  Paint_DrawString_EN(30, 50, "ESP32-S3", &Font16, 0x001F, 0x07FF);
-  Paint_DrawString_EN(20, 80, "Initializing", &Font16, 0x001F, 0xFFE0);
-  Paint_DrawString_EN(30, 100, "WiFi & BLE", &Font16, 0x001F, 0xFFE0);
+  Paint_DrawString_EN(5, 15, "MOUSE JIGGLER", &Font16, 0x001F, 0xFFFF);
+  Paint_DrawString_EN(5, 40, "ESP32-S3-GEEK", &Font16, 0x001F, 0x07FF);
   
-  delay(1000);
+  // Author info
+  Paint_DrawString_EN(5, 70, "YEVHENII RODIN", &Font16, 0x001F, 0xFFE0);
+  Paint_DrawString_EN(5, 95, "BLARODIN@GMAIL.COM", &Font16, 0x001F, 0xFFE0);
+  
+  delay(2000);
   
   // Start WiFi AP and web server
   Serial.println("Starting WiFi AP...");
