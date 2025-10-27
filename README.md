@@ -69,12 +69,7 @@ A Bluetooth Low Energy (BLE) mouse jiggler for the ESP32-S3-GEEK device that pre
 ### Initial Setup
 
 1. Upload the code to your ESP32-S3-GEEK
-2. The device displays a boot screen (2 seconds) showing:
-   - **MOUSE JIGGLER** (white)
-   - **ESP32-S3-GEEK** (cyan)
-   - **YEVHENII RODIN** (yellow)
-   - **BLARODIN@GMAIL.COM** (yellow)
-   
+2. The device displays a boot screen (2 seconds)
 3. After the boot screen, WiFi AP information alternates between 2 screens:
    
    **Screen 1 - WiFi Network:**
@@ -150,11 +145,6 @@ The display uses optimized rendering to minimize flickering and power consumptio
 The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, informative interface:
 
 **Boot Screen (2 seconds):**
-- Left-aligned display showing:
-  - **MOUSE JIGGLER** (white)
-  - **ESP32-S3-GEEK** (cyan)
-  - **YEVHENII RODIN** (yellow - author)
-  - **BLARODIN@GMAIL.COM** (yellow - contact)
 
 **Startup Display (WiFi Configuration):**
 
