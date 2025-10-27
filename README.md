@@ -144,7 +144,7 @@ The display uses optimized rendering to minimize flickering and power consumptio
 
 The ESP32-S3-GEEK's built-in 1.14" LCD (135x240 pixels) displays a beautiful, informative interface:
 
-**Boot Screen (2 seconds):**
+**Boot Screen (2 seconds)**
 
 **Startup Display (WiFi Configuration):**
 
